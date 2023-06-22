@@ -193,7 +193,6 @@ public class ProjectController {
   @PostMapping("/projects/{projectId}/tasks/create")
   public String createTask(
     @PathVariable("projectId") Long id,
-    @ModelAttribute("project") Project project,
     @Valid @ModelAttribute("task") Task task,
     BindingResult result,
     HttpSession session,
@@ -201,11 +200,13 @@ public class ProjectController {
   ) {
     if (result.hasErrors()) {
       Long userId = (Long) session.getAttribute("userId");
-      model.addAttribute("project", project);
-      model.addAttribute("userId", userId);
-      model.addAttribute("userName", userService.getUserById(userId).getUserName());
+      model.addAttribute("project", projectService.getProjectById(id));
+      model.addAttribute("user", userService.getUserById(userId));
       model.addAttribute("task", task);
+
+      return "project/viewTasks.jsp";
     }
+    Project project = projectService.getProjectById(id);
     Task newTask = taskService.createTask(task);
     project.getTasks().add(newTask);
     projectService.updateProject(project);
